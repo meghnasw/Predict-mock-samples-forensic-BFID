@@ -9,7 +9,8 @@ output:
 ```{r setup, include = TRUE}
 rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = "/Users/meghnaswayambhu/Meghna/Zurich/PhD/New_structure_Meghna/Colleagues/Predict_mock_samples/Microbiome_Analyses")
+knitr::opts_knit$set(root.dir = getwd())
+getwd()
 ```
 
 #### Before starting:
