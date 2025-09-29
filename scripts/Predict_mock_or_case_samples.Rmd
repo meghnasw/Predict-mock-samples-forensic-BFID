@@ -1,0 +1,187 @@
+---
+title: "Predict mock/case samples: Rscript"
+author: "Meghna Swayambhu"
+date: "20/09/2025"
+output:
+  md_document: default
+---
+
+```{r setup, include = TRUE}
+rm(list=ls())
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/meghnaswayambhu/Meghna/Zurich/PhD/New_structure_Meghna/Colleagues/Predict_mock_samples/Microbiome_Analyses")
+```
+
+#### Before starting:
+
+(i) Please install QIIME2-amplicon-2024.5 via miniconda (<https://library.qiime2.org/quickstart/amplicon>)
+(ii) Ensure that the data is quality filtered, primers were removed and DADA2 pipeline was run
+
+### Step 1. Save outputs from DADA2 pipeline run in R
+
+In case DADA2 was run in QIIME2, skip to Step 2.
+
+#### 1.1 Load packages
+
+```{r}
+for (pkg in c("dada2","tibble")) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+  suppressPackageStartupMessages(library(pkg, character.only = TRUE))
+}
+cat("dada2 version:", as.character(packageVersion("dada2")), "\n")
+```
+
+#### 1.2 Load the seqtab.nochim object from DADA2 and save outputs
+
+Please note that the DADA2 pipeline should be run already!
+
+```{r}
+#Load the seqtab.nochim object from the DADA2 pipeline
+load("01_DADA2/seqtab_nochim.rdata")
+
+#Save the ASV abundance file
+seqtab.nochim_t <- as.data.frame(t(x_sub))
+seqtab.nochim_t_ed <- rownames_to_column(seqtab.nochim_t, var = "#OTU_Table")
+write.table(seqtab.nochim_t_ed, file = "01_DADA2/seqtab_nochim_internalDb.txt", sep = "\t", row.names = F, quote = F)
+
+#Save the sequences
+uniquesToFasta(x_sub, fout='01_DADA2/rep-seqs.fna', ids=colnames(x_sub))
+```
+
+### Step 2. OTU clustering using QIIME2
+
+```{r}
+system("bash scripts/OTU_clustering.sh")
+```
+
+### Step 3. Create phyloseq object and preprocess for predictions
+
+#### 3.1. Load packages
+
+```{r message = FALSE, warning=FALSE}
+for (pkg in c("phyloseq","decontam")) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+  suppressPackageStartupMessages(library(pkg, character.only = TRUE))
+}
+# phyloseq.extended from GitHub
+if (!requireNamespace("phyloseq.extended", quietly = TRUE)) {
+  if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+  remotes::install_github("umerijaz/phyloseq.extended", upgrade = "never")
+}
+suppressPackageStartupMessages(library(phyloseq.extended))
+```
+
+#### 3.2 Create phyloseq object
+
+```{r}
+# Load the metadata
+map <- read.csv("metadata/map.txt", sep = '\t', check.names = F)
+
+# Load the OTU table
+seqtab.nochim <- read.delim("02_QIIME2_otu_clustering/OTU-cr_97_table.tsv", sep = '\t', comment.char = "", check.names = F,skip = 1)
+names(seqtab.nochim)[1] <- "OTU_ID"
+
+# Add the first column as rownames 
+rownames(seqtab.nochim) <- seqtab.nochim[,1]
+seqtab_ps <- seqtab.nochim[,-1]
+# Assign the names of samples (01Sat1...) to metadata rows instead of 1,2,3...
+row.names(map) <- map$sampleid
+map$sampleid <- as.factor(map$sampleid)
+
+# Sanity check to ensure all samples in the OTU table are in the metadata  
+dissimilar_values <- setdiff(map$sampleid,colnames(seqtab_ps))
+
+# must be TRUE : sample IDs should be the same
+# colnames(seqtab_ps)
+if( !all(colnames(seqtab_ps) %in% map$sampleid)){
+  stop(" Sample names must coinside!")
+}
+
+  # Check if metadata is present for every sample
+for(seqname in colnames(seqtab_ps)){
+  if(seqname %in% map$sampleid){
+  } else{
+    stop(paste("missed metadata for :", seqname, " sample"))
+  }
+}
+
+# Check the classes of the final files: 
+# a. seqtab_ps can be matrix or df
+# b. map should be a data frame
+
+class(seqtab_ps)
+class(map)
+
+# Check dimensions for OTU table and metadata
+dim(seqtab_ps)
+dim(map)
+
+# Build the phyloseq object
+pseq_silva <- phyloseq(otu_table(seqtab_ps, taxa_are_rows = TRUE), sample_data(map))
+save(pseq_silva, file = "03_Phyloseq/pseq_silva.RData")
+nsamples(pseq_silva) #n=10
+ntaxa(pseq_silva) #n=408
+```
+
+#### 3.3 Preprocess for prediction
+
+```{r}
+# Remove zero abundance taxa (if any)
+nonzero_abundance_taxa <- taxa_names(pseq_silva)[taxa_sums(pseq_silva) != 0]
+pseq_silva_nozero <- prune_taxa(nonzero_abundance_taxa, pseq_silva)
+
+# Remove samples with less than 1000 reads.
+# Save low read samples
+low_read <- as.data.frame(sample_names(pseq_silva_nozero)[sample_sums(pseq_silva_nozero) < 1000])
+write.csv(low_read, file = "03_Phyloseq/sample_rd_below1000.csv")
+#retain the high_read samples only
+high_read <- sample_names(pseq_silva_nozero)[sample_sums(pseq_silva_nozero) > 1000]
+
+pseq_pruned <- prune_samples(high_read, pseq_silva_nozero)
+save(pseq_pruned, file="03_Phyloseq/pseq_pruned.RData")
+
+nsamples(pseq_pruned) #n=9
+ntaxa(pseq_pruned) # n=408
+
+# Remove zero abundance taxa
+nonzero_abundance_taxa_pruned <- taxa_names(pseq_pruned)[taxa_sums(pseq_pruned) != 0]
+pseq_pruned_nozero <- prune_taxa(nonzero_abundance_taxa_pruned, pseq_pruned)
+ntaxa(pseq_pruned_nozero)
+nsamples(pseq_pruned_nozero)
+summary(sample_sums(pseq_pruned_nozero))
+summary(taxa_sums(pseq_pruned_nozero))
+
+### Optional: Use decontam HERE! 
+# decontam based on prevalence was used with a threshold of 0.1
+
+# Exclude negative controls if used decontam earlier
+pseq_pruned_nonegs <- subset_samples(pseq_pruned_nozero, Body_site_ed != "negative_control_reagent")
+nsamples(pseq_pruned_nonegs) #n=8
+
+nonzero_abundance_taxa <- taxa_names(pseq_pruned_nonegs)[taxa_sums(pseq_pruned_nonegs) != 0]
+pseq_nozero <- prune_taxa(nonzero_abundance_taxa, pseq_pruned_nonegs)
+ntaxa(pseq_nozero) #n=391
+save(pseq_nozero, file="03_Phyloseq/pseq_nozero.RData")
+
+```
+
+#### 3.4 Normalize and save OTU table for prediction
+
+```{r}
+load("03_Phyloseq/pseq_nozero.RData")
+map = sample_data(pseq_nozero)
+nsamples(pseq_nozero)
+
+# Normalize data using TSS 
+pseq_new_normal  = transform_sample_counts(pseq_nozero, function(x) x / sum(x))
+otu <- as.data.frame(otu_table(pseq_new_normal))
+otu_ed <- rownames_to_column(otu, var = "#OTU_Table")
+write.table(otu_ed,
+         file = "04_QIIME2_predict/QIIME2_otu_table_TSS.txt", sep = "\t", row.names = F, quote = F)
+```
+
+### Step 4. Predict samples
+
+```{r}
+system("bash scripts/Prediction_QIIME2.sh")
+```

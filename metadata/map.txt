@@ -1,0 +1,11 @@
+sampleid	Body_site_ed
+PCR-neg-1	negative_control_reagent
+PCR-neg-2	negative_control_reagent
+Sa-01	Saliva
+Sa-05	Saliva
+Sem-01	Semen
+Sem-03	Semen
+Sk-01	Skin_hand_forearm
+Sk-04	Skin_hand_forearm
+V-01	Vaginal_swab
+V-03	Vaginal_swab
