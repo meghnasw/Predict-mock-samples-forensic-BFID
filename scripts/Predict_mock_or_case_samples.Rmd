@@ -10,7 +10,7 @@ output:
 rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = dirname(getwd()))
-getwd()
+dirname(getwd())
 ```
 
 #### Before starting:
