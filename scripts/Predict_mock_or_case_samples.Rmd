@@ -9,8 +9,15 @@ output:
 ```{r setup, include = TRUE}
 rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = dirname(getwd()))
-dirname(getwd())
+if (interactive()) {
+  new_dir <- dirname(dirname(rstudioapi::getActiveDocumentContext()$path))
+  setwd(new_dir)  # affects your session
+  knitr::opts_knit$set(root.dir = new_dir)
+} else {
+  new_dir <- dirname(knitr::current_input())
+  knitr::opts_knit$set(root.dir = new_dir)
+}
+getwd()
 ```
 
 #### Before starting:
@@ -153,7 +160,7 @@ summary(sample_sums(pseq_pruned_nozero))
 summary(taxa_sums(pseq_pruned_nozero))
 
 ### Optional: Use decontam HERE! 
-# decontam based on prevalence was used with a threshold of 0.1
+# decontam based on prevalence was used with a threshold of 0.1 in the AEM paper and for training the classifier.
 
 # Exclude negative controls if used decontam earlier
 pseq_pruned_nonegs <- subset_samples(pseq_pruned_nozero, Body_site_ed != "negative_control_reagent")
@@ -186,3 +193,6 @@ write.table(otu_ed,
 ```{r}
 system("bash scripts/Prediction_QIIME2.sh")
 ```
+
+The predictions and probabilities are in files: 04_QIIME2_predict/new_predictions.qzv and 04_QIIME2_predict/new_probabilities.qzv. To access the results, simply unzip the .qzv files and find the .tsv files in the data folder. Alternatively, drag-and-drop them on https://view.qiime2.org/. 
+
