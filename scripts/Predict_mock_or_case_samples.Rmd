@@ -45,15 +45,15 @@ Please note that the DADA2 pipeline should be run already!
 
 ```{r}
 #Load the seqtab.nochim object from the DADA2 pipeline
-load("01_DADA2/seqtab_nochim.rdata")
-
+dada2_obj <- load("01_DADA2/seqtab_nochim.rdata")
+seqtab <- get(dada2_obj)
 #Save the ASV abundance file
-seqtab.nochim_t <- as.data.frame(t(x_sub))
+seqtab.nochim_t <- as.data.frame(t(seqtab))
 seqtab.nochim_t_ed <- rownames_to_column(seqtab.nochim_t, var = "#OTU_Table")
 write.table(seqtab.nochim_t_ed, file = "01_DADA2/seqtab_nochim_internalDb.txt", sep = "\t", row.names = F, quote = F)
 
 #Save the sequences
-uniquesToFasta(x_sub, fout='01_DADA2/rep-seqs.fna', ids=colnames(x_sub))
+uniquesToFasta(seqtab, fout='01_DADA2/rep-seqs.fna', ids=colnames(seqtab))
 ```
 
 ### Step 2. OTU clustering using QIIME2
@@ -190,15 +190,10 @@ write.table(otu_ed,
 
 ### Step 4. Predict samples
 
-The classifier was trained using QIIME2. Training data consists of:
-- Data from V3V4, V4 and V4V5 regions 
-- Data from 7 body fluids/tissues: Fecal, Saliva, Semen, Skin-penile, Skin-hand, Urine and Vaginal swab. Vaginal swab samples comprise data from vaginal fluid and menstrual blood samples. 
-- Total 366 samples
-- The classifier file is in Reference_files/sample_estimator.qza
+The classifier was trained using QIIME2. Training data consists of: - Data from V3V4, V4 and V4V5 regions - Data from 7 body fluids/tissues: Fecal, Saliva, Semen, Skin-penile, Skin-hand, Urine and Vaginal swab. Vaginal swab samples comprise data from vaginal fluid and menstrual blood samples. - Total 366 samples - The classifier file is in Reference_files/sample_estimator.qza
 
 ```{r}
 system("bash scripts/Prediction_QIIME2.sh")
 ```
 
-The predictions and probabilities are in files: 04_QIIME2_predict/new_predictions.qzv and 04_QIIME2_predict/new_probabilities.qzv. To access the results, simply unzip the .qzv files and find the .tsv files in the data folder. Alternatively, drag-and-drop them on https://view.qiime2.org/. 
-
+The predictions and probabilities are in files: 04_QIIME2_predict/new_predictions.qzv and 04_QIIME2_predict/new_probabilities.qzv. To access the results, simply unzip the .qzv files and find the .tsv files in the data folder. Alternatively, drag-and-drop them on <https://view.qiime2.org/>.

@@ -1,5 +1,5 @@
 # Predict mock samples
-1) A toy dataset: Since the classifier was trained on OTUs clustered at 97%, it is best to process the case samples/mock samples in the same way as the classifier. The attachment covers all these steps and the toy dataset should give you concrete examples on how the input files should look like for each step. 
+1) A toy dataset: Since the classifier was trained on OTUs clustered at 97%, it is best to process the case samples/mock samples in the same way as the classifier. The attachment covers all these steps and the toy dataset of 10 samples should give you concrete examples on how the input files should look like for each step. Please note that the toy dataset is really only for demonstration purposes and it is a subset of the training data. 
 
 Please note that the toy dataset provided solely for demonstration purposes. This dataset is a subset of the training data, and therefore any results obtained from it should not be interpreted as meaningful, as the samples were already used during model training. 
 
