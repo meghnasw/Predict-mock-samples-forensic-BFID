@@ -192,7 +192,7 @@ write.table(otu_ed,
 
 The classifier was trained using QIIME2. Training data consists of:
 - Data from V3V4, V4 and V4V5 regions 
-- Data from 7 body sites: Fecal, Saliva, Semen, Skin-penile, Skin-hand, Urine and Vaginal swab. Vaginal swab samples comprise data from vaginal fluid and menstrual blood samples. 
+- Data from 7 body fluids/tissues: Fecal, Saliva, Semen, Skin-penile, Skin-hand, Urine and Vaginal swab. Vaginal swab samples comprise data from vaginal fluid and menstrual blood samples. 
 - Total 366 samples
 - The classifier file is in Reference_files/sample_estimator.qza
 
