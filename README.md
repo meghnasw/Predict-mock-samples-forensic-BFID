@@ -125,12 +125,14 @@ This will reproduce the expected structure and output for a successful test.
 ├── metadata/
 │   └── map.txt              # Example metadata file (replace with your own)
 │
+├── Reference_files/
+│   ├── sample_estimator.qza  # The classifier
+│   ├── silva-138-ssu-nr99-seqs-derep-uniq-97.qza              # Reference file for closed reference clustering
+
 ├── scripts/
 │   ├── Predict_mock_or_case_samples.Rmd  # Main R Markdown workflow
 │   ├── OTU_clustering_97.sh              # Bash script for OTU clustering
 │   └── Prediction_QIIME2.sh              # Bash script for prediction
-│
-└── toy_dataset/             # Example input and output files for testing
 ```
 
 ---
