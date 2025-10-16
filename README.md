@@ -1,19 +1,174 @@
 # Predict mock samples
-1) A toy dataset: Since the classifier was trained on OTUs clustered at 97%, it is best to process the case samples/mock samples in the same way as the classifier. The attachment covers all these steps and the toy dataset of 10 samples should give you concrete examples on how the input files should look like for each step. Please note that the toy dataset is really only for demonstration purposes and it is a subset of the training data. 
+# Toy Dataset and Prediction Workflow
 
-Please note that the toy dataset provided solely for demonstration purposes. This dataset is a subset of the training data, and therefore any results obtained from it should not be interpreted as meaningful, as the samples were already used during model training. 
+This repository provides a **toy dataset** and accompanying scripts for demonstrating the prediction workflow for body fluid or tissue classification based on 16S rRNA sequencing data. The workflow shows how to process case/mock samples in a way consistent with the training data used to build the classifier.
 
-2) The main script: Follow the R markdown file in: scripts/Predict_mock_or_case_samples.Rmd. You can simply run each chunk with the green arrow on the upper right side of the chunks in RStudio. This script calls onto two bash scripts: one that does the OTU clustering at 97% and the other that actually does the predictions. You can also just follow the  scripts/Prediction_QIIME2.sh file if you only want to only run the prediction step. 
+---
 
-3) Classifier:
+## Toy Dataset
 
-Includes data from V3V4, V4 and V4V5 regions and data from 7 body fluids/tissues (Fecal, Saliva, Semen, Skin-penile, Skin-hand, Urine and Vaginal swab). 
-Vaginal swab category includes data from vaginal fluid and menstrual blood. 
-Total 366 samples
+A **toy dataset** of 10 samples is provided to give concrete examples of how the input files should look at each step of the analysis.  
+Please note:
 
-Where to plug in your files:
+> ⚠️ The toy dataset is **solely for demonstration purposes**.  
+> It is a **subset of the original training data**, and any results obtained from it should **not** be interpreted as meaningful, since these samples were already used during model training.
 
-Please note that you would have to run the DADA2 pipeline on your case samples first and then follow the R markdown. You would need to replace the following with your files and run the markdown:
+The dataset includes all necessary intermediate files and can be used to test or explore the workflow.
 
-    - 01_DADA2/seqtab_nochim.rdata # DADA2 output
-    - metadata/map.txt # Metadata
+---
+
+## Classifier Overview
+
+The classifier was trained on **OTUs clustered at 97% similarity** and includes data from multiple 16S regions and biological sources:
+
+- **Regions:** V3–V4, V4, and V4–V5  
+- **Body fluids/tissues (7 categories):**
+  - Fecal  
+  - Saliva  
+  - Semen  
+  - Skin (penile)  
+  - Skin (hand)  
+  - Urine  
+  - Vaginal swab (includes vaginal fluid and menstrual blood)  
+
+**Total samples used in training:** 366
+
+To ensure compatibility, case/mock samples should be processed in the **same way** as the training data (i.e., OTU clustering at 97%).
+
+---
+
+## Workflow Summary
+
+### Main Script
+Follow the R Markdown script:
+
+```
+scripts/Predict_mock_or_case_samples.Rmd
+```
+
+You can open this file in **RStudio** and execute each code chunk using the green arrow icon on the top right of each block.
+
+This script:
+- Calls two **bash scripts**:
+  - One for **OTU clustering at 97%**
+  - Another for **running predictions**
+
+If you only want to perform the prediction step directly, you can instead use:
+
+```
+scripts/Prediction_QIIME2.sh
+```
+
+---
+
+## Getting Started
+
+### 1. System Requirements
+
+- **R ≥ 4.0.0**
+- **RStudio** (recommended)
+- **QIIME 2** (for preprocessing)
+- **bash** (for running `.sh` scripts)
+- **DADA2** (for ASV processing)
+
+### 2. R Package Dependencies
+
+The main R Markdown script uses the following R packages:
+
+```r
+install.packages(c(
+  "tidyverse",
+  "phyloseq",
+  "randomForest",
+  "caret",
+  "data.table",
+  "knitr",
+  "rmarkdown"
+))
+```
+
+You can also install them automatically by running the setup chunk in the R Markdown file.
+
+### 3. QIIME 2 Environment
+
+Make sure your QIIME 2 environment is active before running the bash scripts:
+```bash
+conda activate qiime2
+```
+
+### 4. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/projectname.git
+cd projectname
+```
+
+### 5. Test the Workflow
+
+To ensure everything is configured correctly, run the R Markdown file on the **toy dataset** provided.  
+This will reproduce the expected structure and output for a successful test.
+
+---
+
+## File Structure
+
+```
+.
+├── 01_DADA2/                # Folder for DADA2 outputs
+│   └── seqtab_nochim.rdata  # Example DADA2 output (replace with your own)
+├── 02_QIIME2_otu_clustering/                # Folder for QIIME2 outputs generated by script OTU_clustering_97.sh
+| 
+├── 03_Phyloseq/                # Folder for Phyloseq outputs
+│
+├── 04_QIIME2_predict/                # Folder for QIIME2 prediction outputs generated by script Prediction_QIIME.sh
+│
+├── metadata/
+│   └── map.txt              # Example metadata file (replace with your own)
+│
+├── Reference_files/
+│   ├── sample_estimator.qza  # The classifier
+│   ├── silva-138-ssu-nr99-seqs-derep-uniq-97.qza              # Reference file for closed reference clustering
+
+├── scripts/
+│   ├── Predict_mock_or_case_samples.Rmd  # Main R Markdown workflow
+│   ├── OTU_clustering_97.sh              # Bash script for OTU clustering
+│   └── Prediction_QIIME2.sh              # Bash script for prediction
+```
+
+---
+
+## Where to Plug In Your Files
+
+Before running the prediction workflow:
+
+1. Run your **DADA2 pipeline** on your case samples.  
+2. Replace the toy dataset files with your own outputs in the following locations:
+
+| File to Replace | Description |
+|-----------------|--------------|
+| `01_DADA2/seqtab_nochim.rdata` | Output from DADA2 (sequence table after chimera removal) |
+| `metadata/map.txt` | Metadata file containing sample information |
+
+After these replacements, follow the steps in the R Markdown script.
+
+---
+
+## Notes
+
+- Ensure that **OTU clustering is done at 97%** to match the classifier’s training setup.
+- The toy dataset can be used to verify that your environment and dependencies are configured correctly.
+- For actual analysis, always use your own data processed through the same pipeline.
+
+---
+
+## Citation
+
+If you use this workflow or dataset as a reference, please cite the original classifier publication or associated dataset (if available).
+
+---
+
+**Author:**  
+*Zurich Institute of Forensic Medicine, Forensic Genetics Dept.*  
+*Contact:* 
+Dr. Natasha Arora [natasha.arora@uzh.ch]
+Dr. Megha Swayambhu [meghna.swayambhu@uzh.ch]
