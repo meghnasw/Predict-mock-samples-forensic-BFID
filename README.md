@@ -93,7 +93,7 @@ You can also install them automatically by running the setup chunk in the R Mark
 
 Make sure your QIIME 2 environment is active before running the bash scripts:
 ```bash
-conda activate qiime2
+conda activate qiime2-amplicon-2024.5
 ```
 
 ### 4. Clone the Repository
