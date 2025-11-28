@@ -99,8 +99,8 @@ conda activate qiime2
 ### 4. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/projectname.git
-cd projectname
+git clone https://github.com/meghnasw/Predict-mock-samples-forensic-BFID.git
+cd Predict-mock-samples-forensic-BFID
 ```
 
 ### 5. Test the Workflow
@@ -163,7 +163,8 @@ After these replacements, follow the steps in the R Markdown script.
 
 ## Citation
 
-If you use this workflow or dataset as a reference, please cite the original classifier publication or associated dataset (if available).
+If you use this workflow or dataset as a reference, please cite the original classifier publication:
+Swayambhu, M., Gysi, M., Haas, C., Schuh, L., Walser, L., Javanmard, F., ... & Arora, N. (2025). Standardizing a microbiome pipeline for body fluid identification from complex crime scene stains. Applied and Environmental Microbiology, 91(5), e01871-24.
 
 ---
 
