@@ -172,4 +172,4 @@ Swayambhu, M., Gysi, M., Haas, C., Schuh, L., Walser, L., Javanmard, F., ... & A
 *Zurich Institute of Forensic Medicine, Forensic Genetics Dept.*  
 *Contact:* 
 Dr. Natasha Arora [natasha.arora@uzh.ch]
-Dr. Megha Swayambhu [meghna.swayambhu@uzh.ch]
+Dr. Meghna Swayambhu [meghna.swayambhu@uzh.ch]
